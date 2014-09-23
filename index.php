@@ -1,13 +1,16 @@
 <?php
 
-require_once("src/LoginController.php");
-require_once("viewHTML.php");
-
 session_start();
 
+define('DS', DIRECTORY_SEPARATOR);
+define('ROOT_DIR', dirname(__FILE__) . DS);
+define('ROOT_PATH', '/' . basename(dirname(__FILE__)) . '/');
 
-$controller = new LoginController();
-$htmlBody = $controller->doCheckLogin();
+require_once(ROOT_DIR . 'lib' . DS . 'router.php');
+require_once(ROOT_DIR . 'lib' . DS . 'viewHTML.php');
 
-$view = new viewHTML();
-$view->showHTML($htmlBody);
+$router = new Router();
+$html = $router->runApp();
+
+$viewHTML = new viewHTML();
+$viewHTML->showHTML($html);
