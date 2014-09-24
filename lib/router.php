@@ -8,7 +8,7 @@ class Router{
 	*	Takes the $_GET from request to figure out what controller and method in that controller to run.
 	*/
 	public function __construct(){
-		$this->controller = isset($_GET['c']) ? $_GET['c'] : 'Login';
+		$this->controller = isset($_GET['c']) ? $_GET['c'] : 'login';
 		$this->action = isset($_GET['a']) ? $_GET['a'] : '';
 	}
 	
@@ -32,10 +32,10 @@ class Router{
 	*	@return controller-object
 	*/
 	private function loadController(){
-		$controllerPath = ROOT_DIR . 'app' . DS . 'controllers' . DS . $this->controller . 'Controller.php';
+		$controllerPath = ROOT_DIR . 'app' . DS . 'controllers' . DS . strtolower($this->controller) . '_controller.php';
 		if(file_exists($controllerPath)){
 			require_once($controllerPath);
-			$controllerClassName = $this->controller . 'Controller';
+			$controllerClassName = ucfirst($this->controller) . 'Controller';
 			if(class_exists($controllerClassName)){
 				return new $controllerClassName();
 			}

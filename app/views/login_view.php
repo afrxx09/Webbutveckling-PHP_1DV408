@@ -1,6 +1,6 @@
 <?php
 
-class LoginView {
+class LoginView extends View{
 	
 	/**
 	*	Constants for error and success messages
@@ -21,8 +21,6 @@ class LoginView {
 	
 	private $model;
 	
-	private $message = '';
-	private $body = '';
 	private $boolLoggedInStatus = false;
 	private $loggedInUser;
 
@@ -143,13 +141,6 @@ class LoginView {
 	/**
 	*	Added View Methods
 	*/
-	public function setMessage($s){
-		$this->message = '<p>' . $s . '</p>';
-	}
-	
-	public function setBody($s){
-		$this->body = $s;
-	}
 	
 	public function setLoggedInStatus($b){
 		$this->boolLoggedInStatus = $b;
@@ -159,7 +150,7 @@ class LoginView {
 		$this->loggedInUser = $s;
 	}
 	
-	public function renderHTML(){
+	public function getViewHtml(){
 		return $this->getStatusHtml() . $this->message . $this->body . $this->showDate();
 	}
 	

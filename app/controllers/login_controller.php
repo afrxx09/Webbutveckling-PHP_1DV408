@@ -1,10 +1,10 @@
 <?php
 
-require_once(ROOT_DIR . 'app' . DS . 'models' . DS . 'LoginModel.php');
-require_once(ROOT_DIR . 'app' . DS . 'views' . DS . 'LoginView.php');
+require_once(ROOT_DIR . 'app' . DS . 'models' . DS . 'login_model.php');
+require_once(ROOT_DIR . 'app' . DS . 'views' . DS . 'login_view.php');
 
 
-class LoginController {
+class LoginController extends Controller{
 	private $model;
 	private $view;  
 
@@ -104,11 +104,11 @@ class LoginController {
 	
 	private function loginPage(){
 		$this->view->setBody($this->view->showLoginForm());
-		return $this->view->renderHTML();
+		return $this->view->getViewHtml();
 	}
 	
 	private function successPage(){
 		$this->view->setBody($this->view->showUserLoggedInPage());
-		return $this->view->renderHTML();
+		return $this->view->getViewHtml();
 	}
 }
