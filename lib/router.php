@@ -1,5 +1,9 @@
 <?php
 
+require_once(ROOT_DIR . 'lib' . DS . 'view.php');
+require_once(ROOT_DIR . 'lib' . DS . 'controller.php');
+require_once(ROOT_DIR . 'lib' . DS . 'model.php');
+
 class Router{
 	private $controller;
 	private $action;
@@ -17,14 +21,9 @@ class Router{
 	*	@return string 
 	*/
 	public function runApp(){
-		try{
-			$controller = $this->loadController();
-			$action = (method_exists($controller, $this->action)) ? $this->action : 'index';
-			return call_user_func(array($controller, $action));
-		}
-		catch(Exception $e){
-			return $e->getMessage();
-		}
+		$controller = $this->loadController();
+		$action = (method_exists($controller, $this->action)) ? $this->action : 'index';
+		return call_user_func(array($controller, $action));
 	}
 	
 	/**
@@ -39,9 +38,9 @@ class Router{
 			if(class_exists($controllerClassName)){
 				return new $controllerClassName();
 			}
-			throw new Exception('Could not load controller class.');
+			throw new Exception('Could not load controller class:' . strtolower($this->controller) . '_controller.php');
 		}
-		throw new Exception('Could not find controller class file.');
+		throw new Exception('Could not find controller class file.' . $this->controller);
 	}
 }
 ?>

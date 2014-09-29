@@ -7,7 +7,7 @@ abstract class Model{
 	
 	protected function connection() {
 		if ($this->connection === NULL){
-			$this->connection = new PDO(DB_CONNECTION_STRING, DB_USERNAME, DB_PASSWORD);
+			$this->connection = new PDO(Config::$DB_CONNECTION_STRING, Config::$DB_USERNAME, Config::$DB_PASSWORD);
 		}
 		$this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		return $this->connection;

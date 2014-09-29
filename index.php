@@ -12,22 +12,29 @@ define('ROOT_PATH', '/' . basename(dirname(__FILE__)) . '/');
 /**
 *	Define databse stuff
 */
-define('DB_CONNECTION_STRING', 'mysql:host=127.0.0.1;dbname=lab4');
-define('DB_USERNAME', 'afrxx09');
-define('DB_PASSWORD', 'lnustudent');
+
 
 /**
 *	Include core classes for application
 */
+require_once(ROOT_DIR . 'cfg' . DS . 'config.php');
 require_once(ROOT_DIR . 'lib' . DS . 'router.php');
 require_once(ROOT_DIR . 'lib' . DS . 'viewHTML.php');
 
-require_once(ROOT_DIR . 'lib' . DS . 'view.php');
-require_once(ROOT_DIR . 'lib' . DS . 'controller.php');
-require_once(ROOT_DIR . 'lib' . DS . 'model.php');
+try{
+	$router = new Router();
+	$html = $router->runApp();
 
-$router = new Router();
-$html = $router->runApp();
-
-$viewHTML = new viewHTML();
-$viewHTML->showHTML($html);
+	$viewHTML = new viewHTML();
+	$viewHTML->showHTML($html);
+}
+catch(\Exception $e){
+	if(Config::$DEV_MODE){
+		var_dump($e);
+	}
+	else{
+		error_log('[' . date('Y-m-d H:i:s') . '] ' . $e->getMessage() . "\n", 3 , ROOT_DIR . 'error_log_deploy.log');
+		header('location: 404.html');
+	}
+	
+}

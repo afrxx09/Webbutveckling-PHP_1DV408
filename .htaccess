@@ -1,0 +1,2 @@
+RewriteRule ^(.*)$ - [L,R=404]
+ErrorDocument 404 /Webbutveckling-PHP_1DV408/404.html

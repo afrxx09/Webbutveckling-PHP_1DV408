@@ -25,7 +25,7 @@ class LoginController extends Controller{
 	}
 	
 	public function logout(){
-		$this->view->removeCookies();
+		$this->view->destroyAuthCookie();
 		$this->model->logout();
 		$this->view->setMessage(LoginView::SUCCESS_LOGOUT);
 		return $this->loginPage();
