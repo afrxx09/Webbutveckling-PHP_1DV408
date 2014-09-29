@@ -1,20 +1,21 @@
 <?php
-//header('Content-Type: text/html; charset=utf-8');
 class viewHTML {
 
 	public function showHTML($body) {
 
 		echo '
-			<!DOCTYPE html>
+			<!doctype html>
 			<html>
-			<head>
-			 	<title>Laboration 2 vl222cu</title>
-			 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-			</head>
-			<body>
-				<h1>Laboration 2 vl222cu</h1>
-			  	<p>' . $body . '</p>
-			</body>
+				<head>
+					<meta charset="utf-8">
+			 		<title>Laboration 2 vl222cu</title>
+				</head>
+				<body>
+					<h1>Laboration 2 vl222cu</h1>
+				  	<div>
+				  		' . $body . '
+				  	</div>
+				</body>
 			</html>
 		';		
 	}

@@ -1,14 +1,34 @@
 <?php
 
 class UserModel extends Model{
+	
 	public function __construct(){
-
+		$this->tabelName = 'user';
+		$this->columns = array('id', 'username', 'password', 'token', 'ip', 'agent');
 	}
-
+	
 	public function create($username, $password, $password_confirm){
-		$username = $this->checkUsername();
+		$username = $this->checkUsername($username);
 		$password = $this->checkPassword($password, $password_confirm);
-		return new User($username, $password);
+		try{
+			$con = $this->connection();
+			$sql = "
+				INSERT INTO
+					" . $this->tabelName . " (" . $this->columns[1] . ", " . $this->columns[2] . ")
+				VALUES
+					(?,?)
+			";
+			$params = array($username, $password);
+			
+			$query = $con->prepare($sql);
+			$query->execute($params);
+		}
+		catch(PDOException $e){
+			if(intval($e->getCode()) === 23000){
+				throw new Exception(UserView::CREATE_USER_ERROR_DUPLICATE_USERNAME);
+			}
+			throw new Exception($e->getMessage());
+		}
 	}
 
 	private function checkUsername($u){
@@ -35,6 +55,10 @@ class UserModel extends Model{
 			throw new Exception(UserView::CREATE_USER_ERROR_PASSORD_LENGTH);
 		}
 		return $password;
+	}
+	
+	public function auth($user, $password){
+		return ($user->getPassword() === $password) ? true : false;
 	}
 }
 ?>

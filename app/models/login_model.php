@@ -7,20 +7,15 @@ class LoginModel {
 		return (isset($_SESSION['username'])) ? $_SESSION['username'] : '';
 	}
 
-	// Kontroll av inloggningsuppgifter
-	public function login($username, $password) {
-		if ($username =='Admin' && $password =='Password'){
-				$_SESSION['LoggedIn'] = true;
-				$_SESSION['username'] = $username;
-				return true;	
-		}
-		return false;
-	} 
+	public function login($user){
+		$_SESSION['token'] = true;
+		$_SESSION['username'] = $user->getUserName();
+	}
 
 	// Utloggning
 	public function logOut() {
 		try{
-			unset($_SESSION['LoggedIn']);
+			unset($_SESSION['token']);
 	  		unset($_SESSION['username']);
 		}
 		catch(Exception $e){
@@ -30,7 +25,7 @@ class LoginModel {
 
 	// Kontrollerar om användaren är inloggad
 	public function userIsLoggedIn() {
-		return (isset($_SESSION['LoggedIn']) && $_SESSION['LoggedIn']) ? true : false;
+		return (isset($_SESSION['token'])) ? true : false;
 	}
 }
 

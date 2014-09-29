@@ -2,8 +2,8 @@
 class Controller{
 	
 	public function redirectTo($controller = '', $action = ''){
-		$location = ROOT_PATH . (($controller != '') ? $controller . '/' : '') . (($action != '') ? $action . '/' : '');
-		header('location: ' . $locaton);
+		$location = (($controller != '') ? '?c=' . $controller : '') . (($action != '') ? '&a='. $action : '');
+		header('location: ' . $location);
 		die();
 	}
 }

@@ -2,9 +2,19 @@
 
 session_start();
 
+/**
+*	Define directory stuff
+*/
 define('DS', DIRECTORY_SEPARATOR);
 define('ROOT_DIR', dirname(__FILE__) . DS);
 define('ROOT_PATH', '/' . basename(dirname(__FILE__)) . '/');
+
+/**
+*	Define databse stuff
+*/
+define('DB_CONNECTION_STRING', 'mysql:host=127.0.0.1;dbname=lab4');
+define('DB_USERNAME', 'afrxx09');
+define('DB_PASSWORD', 'lnustudent');
 
 /**
 *	Include core classes for application

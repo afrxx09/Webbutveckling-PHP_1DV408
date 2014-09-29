@@ -1,13 +1,20 @@
 <?php
 
-class User(){
+class User{
 	private $id;
 	private $username;
 	private $password;
-
-	public function __construct($username, $password){
-		$this->username = $username;
-		$this->password = $password;
+	private $token;
+	private $ip;
+	private $agent;
+	
+	public function __construct($userArray){
+		$this->id = $userArray['id'];
+		$this->username = $userArray['username'];
+		$this->password = $userArray['password'];
+		$this->token = $userArray['token'];
+		$this->ip = $userArray['ip'];
+		$this->agent = $userArray['agent'];
 	}
 
 	/**

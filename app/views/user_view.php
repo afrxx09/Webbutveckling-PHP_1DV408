@@ -7,49 +7,58 @@ class UserView extends View{
 	const CREATE_USER_ERROR_PASSORD_LENGTH = 'Lösenordet måste vara mellan 6 och 20 tecken.';
 	const CREATE_USER_ERROR_PASSWORD_CONFIRM = 'Lösenordet och bekräftelsen stämmer inte överens.';
 	const CREATE_USER_ERROR_PASSWORD_UNALLOWED_CHARS = 'Otillåtna tecken i Lösenordet.';
+	const CREATE_USER_ERROR_DUPLICATE_USERNAME = "Användarnamnet är upptaget.";
 
 	private $model;
+	private $keyUsername = 'username';
+	private $keyPassword = 'password';
+	private $keyPasswordConfirm = 'password_confirm';
 
 	public function __construct($model){
 		$this->model = $model;
 	}
 
 	public function createFormPosted(){
-		return isset($_POST['username']);
+		return isset($_POST[$this->keyUsername]);
 	}
 	public function getUsername(){
-		return isset($_POST['username']) ? strip_tags(trim($_POST['username'])) : null;
+		return isset($_POST[$this->keyUsername]) ? strip_tags(trim($_POST[$this->keyUsername])) : '';
 	}
 	public function getPassword(){
-		return isset($_POST['password']) ? strip_tags(trim($_POST['password'])) : null;
+		return isset($_POST[$this->keyPassword]) ? strip_tags(trim($_POST[$this->keyPassword])) : '';
 	}
 	public function getPasswordConfirm(){
-		return isset($_POST['password_confirm']) ? strip_tags(trim($_POST['password_confirm'])) : null;
+		return isset($_POST[$this->keyPasswordConfirm]) ? strip_tags(trim($_POST[$this->keyPasswordConfirm])) : '';
 	}
 
 	public function getViewHtml(){
-		return $this->message . $this->body;
+		return $this->getMessage() . $this->body;
 	}
 
 	public function add(){
 		return '
-			<form method="post" action="?c=User&a=create">
-				<div class="">
-					<label for="username">Användarnamn</label>
-					<input type="text" name="username" id="username" />
-				</div>
-				<div class="">
-					<label for="password">Lösenord</label>
-					<input type="text" name="password" id="password" />
-				</div>
-				<div class="">
-					<label for="password_confirm">Bekräfta lösenord</label>
-					<input type="text" name="password_confirm" id="password_confirm" />
-				</div>
-				<div class="">
-					<input type="submit" value="Skapa användare" /> 
-				</div>
-			</form>
+			<div>
+				<p><a href="?">Logga in</a></p>
+			</div>
+			<div>
+				<form method="post" action="?c=User&a=create">
+					<div class="">
+						<label for="' . $this->keyUsername . '">Användarnamn</label>
+						<input type="text" name="' . $this->keyUsername . '" id="' . $this->keyUsername'" />
+					</div>
+					<div class="">
+						<label for="' . $this->keyPassword . '">Lösenord</label>
+						<input type="text" name="' . $this->keyPassword . '" id="' . $this->keyPassword . '" />
+					</div>
+					<div class="">
+						<label for="' . $this->keyPasswordConfirm . '">Bekräfta lösenord</label>
+						<input type="text" name="' . $this->keyPasswordConfirm . '" id="' . $this->keyPasswordConfirm . '" />
+					</div>
+					<div class="">
+						<input type="submit" value="Skapa användare" /> 
+					</div>
+				</form>
+			</div>
 		';
 	}
 }

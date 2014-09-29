@@ -2,7 +2,7 @@
 
 abstract class View{
 	
-	protected $message;
+	protected $messageKey = 'message';
 	protected $body;
 
 	public function setBody($s){
@@ -10,7 +10,15 @@ abstract class View{
 	}
 
 	public function setMessage($s){
-		$this->message = '<p>' . $s . '</p>';
+		$_SESSION[$this->messageKey] =  $s;
+	}
+	
+	public function getMessage(){
+		if(isset($_SESSION[$this->messageKey])){
+			$message = $_SESSION[$this->messageKey];
+			unset($_SESSION[$this->messageKey]);
+			return '<p>' . $message . '</p>';
+		}
 	}
 
 	abstract public function getViewHtml();
