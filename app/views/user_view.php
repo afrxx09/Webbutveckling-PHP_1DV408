@@ -32,7 +32,7 @@ class UserView extends View{
 	}
 
 	public function getViewHtml(){
-		return $this->getMessage() . $this->body;
+		return $this->body;
 	}
 
 	public function add(){
@@ -42,21 +42,25 @@ class UserView extends View{
 			</div>
 			<div>
 				<form method="post" action="?c=User&a=create">
-					<div class="">
-						<label for="' . $this->keyUsername . '">Användarnamn</label>
-						<input type="text" name="' . $this->keyUsername . '" id="' . $this->keyUsername'" />
-					</div>
-					<div class="">
-						<label for="' . $this->keyPassword . '">Lösenord</label>
-						<input type="text" name="' . $this->keyPassword . '" id="' . $this->keyPassword . '" />
-					</div>
-					<div class="">
-						<label for="' . $this->keyPasswordConfirm . '">Bekräfta lösenord</label>
-						<input type="text" name="' . $this->keyPasswordConfirm . '" id="' . $this->keyPasswordConfirm . '" />
-					</div>
-					<div class="">
-						<input type="submit" value="Skapa användare" /> 
-					</div>
+					<fieldset>
+						<legend>Registrera ny användare</legend>
+						' . $this->getMessage() . '
+						<div class="">
+							<label for="' . $this->keyUsername . '">Användarnamn</label>
+							<input type="text" name="' . $this->keyUsername . '" id="' . $this->keyUsername . '" />
+						</div>
+						<div class="">
+							<label for="' . $this->keyPassword . '">Lösenord</label>
+							<input type="password" name="' . $this->keyPassword . '" id="' . $this->keyPassword . '" />
+						</div>
+						<div class="">
+							<label for="' . $this->keyPasswordConfirm . '">Bekräfta lösenord</label>
+							<input type="password" name="' . $this->keyPasswordConfirm . '" id="' . $this->keyPasswordConfirm . '" />
+						</div>
+						<div class="">
+							<input type="submit" value="Skapa användare" /> 
+						</div>
+					</fieldset>
 				</form>
 			</div>
 		';

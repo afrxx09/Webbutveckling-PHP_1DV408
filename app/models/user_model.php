@@ -4,7 +4,36 @@ class UserModel extends Model{
 	
 	public function __construct(){
 		$this->tabelName = 'user';
-		$this->columns = array('id', 'username', 'password', 'token', 'ip', 'agent');
+		$this->columns = array('id', 'username', 'password', 'token', 'ip', 'agent', 'cookietime');
+	}
+	
+	public function save($user){
+		try{
+			$con = $this->connection();
+			$sql = "
+				UPDATE
+					" . $this->tabelName . "
+				SET
+					" . $this->tabelName . "." . $this->columns[1] . " = ?,
+					" . $this->tabelName . "." . $this->columns[2] . " = ?,
+					" . $this->tabelName . "." . $this->columns[3] . " = ?,
+					" . $this->tabelName . "." . $this->columns[4] . " = ?,
+					" . $this->tabelName . "." . $this->columns[5] . " = ?,
+					" . $this->tabelName . "." . $this->columns[6] . " = ?
+				WHERE
+					" . $this->tabelName . "." . $this->columns[0] . " = ?
+			";
+			$params = array($user->getUsername(), $user->getPassword(), $user->getToken(), $user->getIp(), $user->getAgent(), $user->getCookieTime(), $user->getId());
+			
+			$query = $con->prepare($sql);
+			$query->execute($params);
+		}
+		catch(PDOException $e){
+			if(intval($e->getCode()) === 23000){
+				throw new Exception(UserView::CREATE_USER_ERROR_DUPLICATE_USERNAME);
+			}
+			throw new Exception($e->getMessage());
+		}
 	}
 	
 	public function create($username, $password, $password_confirm){

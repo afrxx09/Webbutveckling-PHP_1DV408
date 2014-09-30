@@ -26,15 +26,12 @@ class LoginController extends Controller{
 	
 	public function logout(){
 		$this->view->destroyAuthCookie();
-		$this->model->logout();
+		$this->model->destroyLoginSession();
 		$this->view->setMessage(LoginView::SUCCESS_LOGOUT);
 		return $this->loginPage();
 	}
 	
-	public function login() {
-		
-		$this->checkLogin();
-		
+	public function login() {		
 		if($this->view->userPressedLogin() == true){
 			if ($this->view->getUsername() === '') {
 				$this->view->setMessage(LoginView::ERROR_USERNAME);
@@ -58,64 +55,21 @@ class LoginController extends Controller{
 				$this->redirectTo('login');
 			}
 			
-			$this->model->login($user);
-			$this->view->setMessage(LoginView::SUCCESS_LOGIN);
+			$boolRemeberMe = $this->view->getRemeberMe();
+			$user = $this->model->updateUserLoginData($user, $boolRemeberMe);
+			$this->usermodel->save($user);
+			if($boolRemeberMe){
+				$this->view->createAuthCookie($user);
+				$this->view->setMessage(LoginView::SUCCESS_LOGIN_REMEBER);
+			}
+			else{
+				$this->view->setMessage(LoginView::SUCCESS_LOGIN);
+			}
+			
+			$this->model->createLoginSession($user->getToken());
 			$this->view->setLoggedInStatus(true);
 			$this->view->setLoggedInUser($user->getUsername());
-			$this->redirectTo('login');
-			
-			/*
-			if ($this->model->login($this->view->getUsername(), $this->view->getPassword())) {
-				
-				if ($this->view->checkBoxMarked()) {
-					$this->view->setMessage(LoginView::SUCCESS_LOGIN_REMEBER);
-					$this->view->keepUserLoggedIn();
-				}
-				else {
-					$this->view->setMessage(LoginView::SUCCESS_LOGIN);
-				}
-				
-				$this->view->setLoggedInStatus(true);
-				$this->view->setLoggedInUser($this->model->getSessionUsername());
-				$this->redirectTo('login');
-
-			} else {
-					
-				if ($this->view->getUsername() == "") {
-					$this->view->setMessage(LoginView::ERROR_USERNAME);
-
-				}
-				else if ($this->view->getPassword() == "") {
-					$this->view->setMessage(LoginView::ERROR_PASSWORD);
-				}
-				else {
-					$this->view->setMessage(LoginView::ERROR_USERNAME_PASSWORD);
-				} 
-				
-				$this->view->setLoggedInStatus(false);
-				return $this->loginPage();
-			}
-			*/
-
-		}
-		/*
-		//Inloggad via håll mig inloggad-checkboxen
-		if ($this->view->getCookieName() !== null && $this->view->getCookiePassword() !== null) {
-
-			$token = $this->view->setCookieToken();
-
-			if ($token == $this->view->getCookieToken()) {
-				$this->view->setLoggedInStatus(true);
-				$this->view->setLoggedInUser($this->model->getSessionUsername());
-				$this->view->setMessage(LoginView::SUCCESS_COOKIE_LOGIN);
-				return $this->successPage();
-
-			}
-			else {
-				$this->view->setLoggedInStatus(false);
-				$this->view->setMessage(LoginView::ERROR_COOKIE_LOGIN);
-				return $this->loginPage();
-			}			
+			$this->redirectTo('login', 'successPage');
 		}
 		
 		/**
@@ -129,23 +83,85 @@ class LoginController extends Controller{
 	*/
 	
 	private function loginPage(){
-		$this->view->setBody($this->view->showLoginForm());
-		return $this->view->getViewHtml();
+		if(!$this->checkSignIn()){
+			$this->view->setBody($this->view->showLoginForm());
+			return $this->view->getViewHtml();
+		}
+		else{
+			$this->redirectTo('Login', 'successPage');
+		}
+		
 	}
 	
 	public function successPage(){
-		$this->view->setLoggedInStatus(true);
-		$this->view->setLoggedInUser($this->model->getSessionUsername());
-		$this->view->setBody($this->view->showUserLoggedInPage());
-		return $this->view->getViewHtml();
+		if(!$this->checkSignIn()){
+			$this->redirectTo('login');
+		}
+		else{
+			$this->view->setLoggedInStatus(true);
+			$user = $this->usermodel->findBy('token', $this->model->getSessionToken());
+			$this->view->setLoggedInUser($user->getUsername());
+			$this->view->setBody($this->view->showUserLoggedInPage());
+			return $this->view->getViewHtml();
+		}
 	}
 	
-	private function checkLogin(){
-		// Användaren är inloggad via session
-		if ($this->model->userIsLoggedIn()) {
-			$this->view->setLoggedInStatus(true);
-			$this->view->setLoggedInUser($this->model->getSessionUsername());
-			$this->redirectTo('login', 'successPage');
+	/**
+	*	Method to check if a user is signed in or has a persistent auth cookie that can be used to sign in
+	*/
+	public function checkSignIn(){
+		$boolSuccess = false;
+		if($this->model->loginSessionExists()){
+			$user = $this->usermodel->findBy('token', $this->model->getSessionToken());
+			if($user !== null){
+				//Check if the User agent is the same in the DB as on the client
+				if(!$this->model->checkAgent($user)){
+					//$this->view->addFlash(\View\LoginView::UnknownAgent, \View::FlashClassError);
+				}
+				//Check the IP-address from DB and client
+				else if(!$this->model->checkIp($user)){
+					//$this->view->addFlash(\View\LoginView::UnknownIp, \View::FlashClassError);
+				}
+				else{
+					$boolSuccess = true;
+				}
+			}
 		}
+		else{
+			if($this->view->authCookieExists()){
+				if(!$this->signInWithCookie()){
+					//$this->view->addFlash(\View\LoginView::CookieLoginFail, \View::FlashClassError);
+				}
+				else{
+					//$this->view->addFlash(\View\LoginView::CookieLogin, \View::FlashClassSuccess);
+					$boolSuccess = true;
+				}
+			}
+				
+		}
+		return $boolSuccess;
+	}
+	
+	/**
+	*	Method for signing in a user with an auth cookie
+	*/
+	public function signInWithCookie(){
+		$arrCookie = explode(':', $this->view->getAuthCookie());
+		$strCookieToken = $arrCookie[0];
+		$strCookieIdentifier = $arrCookie[1];
+		$user = $this->usermodel->findBy('token', $strCookieToken);
+		if($user !== null){
+			$strCurrentVisitorIdentifier = $this->model->generateIdentifier();
+			//Compare identification string from cookie to newly generated one
+			if($strCurrentVisitorIdentifier === $strCookieIdentifier){
+				//Check in database on user when cookie was created, add the amount of time the view saves cookies.(time cookie was created + 30 days)
+				//If the time right now is less than that(time created + 30 days) it's presumed that the cookie expire date has been tampered with
+				if(($user->getCookieTime() + $this->view->getAuthCookieTime()) > time()){
+					$this->model->createLoginSession($user->getToken());
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

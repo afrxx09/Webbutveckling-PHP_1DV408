@@ -14,14 +14,8 @@ class LoginView extends View{
 	const SUCCESS_LOGIN_REMEBER = 'Inloggning lyckades och vi kommer ihåg dig nästa gång.';
 	const SUCCESS_LOGOUT = 'Du har nu loggat ut.';
 	
-	/*
-	private $strUsernameCookie = 'username';
-	private $strPasswordCookie = 'password';
-	private $strTokenCookie = 'cookietoken';
-	private $intCookieTime = 86400;//1*24*60*60 = 1 day
-	*/
-	private $keyCookieToken = 'cookietoken';
-	private $cookietime = 2592000; //60*60*24*30 = 30 days
+	private $cookieName = 'auth';
+	private $cookieTime = 2592000; //60*60*24*30 = 30 days
 	
 	private $keyUsername = 'username';
 	private $keyPassword = 'password';
@@ -41,20 +35,6 @@ class LoginView extends View{
 		return (isset($_POST[$this->keyRemeberMe])) ? true : false;
 	}
 
-	public function getCookieName(){
-		return (isset($_COOKIE[$this->strUsernameCookie])) ? $_COOKIE[$this->strUsernameCookie] : '';
-	}
-
-	// Hämtar lösenord som är sparad i cookien
-	public function getCookiePassword(){
-		return (isset($_COOKIE[$this->strPasswordCookie])) ? $_COOKIE[$this->strPasswordCookie] : '';
-	}
-
-	// Hämtar token 
-	public function getCookieToken(){
-		return (isset($_COOKIE[$this->strTokenCookie])) ? $_COOKIE[$this->strTokenCookie] : '';
-	}
-
 	// Hämtar input från användarnamnsfältet
 	public function getUsername(){
 		return (isset($_POST[$this->keyUsername])) ? $_POST[$this->keyUsername] : '';
@@ -66,49 +46,48 @@ class LoginView extends View{
 		return (isset($_POST[$this->keyPassword])) ? $_POST[$this->keyPassword] : '';
 	}
 	
-	public function destroyAuthCookie(){
-		unset($_COOKIE[$this->keyCookieToken]);
-		setcookie($this->keyCookieToken, '', time() - 3600, '/');
+	/**
+	*	Check if there is an autgh cookie present
+	*	@return bool
+	*/
+	public function authCookieExists(){
+		return isset($_COOKIE[$this->cookieName]);
 	}
 	
-	public function createAuthCookie($token, $identifier){
-		$content = $token . ':' . $identifier;
-		setcookie($this->keyCookieToken, $content, time() + $this->cookietime, '/');
-	}
-	/*
-	public function removeCookies(){
-		if(isset($_COOKIE[$this->strUsernameCookie]) && isset($_COOKIE[$this->strPasswordCookie]) && isset($_COOKIE[$this->strPasswordCookie])) {
-				setcookie($this->strUsernameCookie, '', time() - 3600, '/');
-            	setcookie($this->strPasswordCookie, '', time() - 3600, '/');
-            	setcookie($this->strTokenCookie, '', time() - 3600, '/');
-        }
-        return NULL; 
-	}
+	/**
+	*	Destroys auth cookie
+	*	@return void
 	*/
-	/*
-	public function setCookieToken() {
-		$cookieToken = crypt(date("1") . $_SERVER["HTTP_USER_AGENT"] . date("d"));
-		return $cookieToken;
+	public function destroyAuthCookie(){
+		unset($_COOKIE[$this->cookieName]);
+		setcookie($this->cookieName, '', time() - 3600, '/');
 	}
+	
+	/**
+	*	Creates an auth cookie based on user data.
+	*	@return void
 	*/
-	/* Skapar cookies för att hålla användaren inloggad om checkbox markerad
-	och tar bort ev gamla cookies */
-	/*
-	public function keepUserLoggedIn() {
-		if(isset($_COOKIE[$this->strUsernameCookie]) && isset($_COOKIE[$this->strPasswordCookie])) {
-			setcookie($this->strUsernameCookie, '', time() - 3600, '/');
-        	setcookie($this->strPasswordCookie, '', time() - 3600, '/');
-        	setcookie($this->strTokenCookie, '', time() - 3600, '/');
-        }
-
-		$passwordIsEncrypted = crypt($_POST[$this->keyPassword]);
-		$cookieToken = $this->setCookieToken();
-
-		setcookie($this->strUsernameCookie, $_POST[$this->keyUsername], time() + $this->intCookieTime, '/');
-		setcookie($this->strPasswordCookie, $passwordIsEncrypted, time() + $this->intCookieTime, '/');
-		setcookie($this->strTokenCookie, $cookieToken, time() + $this->intCookieTime, '/');
+	public function createAuthCookie($user){
+		$strCookieContent = $this->model->generateCookieContent($user);
+		setcookie($this->cookieName, $strCookieContent, time() + $this->cookieTime, '/');
 	}
+	
+	/**
+	*	Returns the value of auth cookie
+	*	@return string
 	*/
+	public function getAuthCookie(){
+		return $_COOKIE[$this->cookieName];
+	}
+	
+	/**
+	*	Return the amount of seconds an auth cookie is saved
+	*	@return bool
+	*/
+	public function getAuthCookieTime(){
+		return $this->cookieTime;
+	}
+	
 	// Sätter aktuell tid och datum
 	public function showDate() {
 		setlocale(LC_ALL, 'sve');
@@ -125,23 +104,24 @@ class LoginView extends View{
 			</div>
 			<div>
 			  	<form name='login' action='?c=Login' method='post' accept-charset='utf-8'>
-					<div>
-						<p>Login - Skriv in användarnamn och lösenord</p>
-					</div>
-					<div>
-						<label for='$this->keyUsername'>Användarnamn</label>
-						<input type='text' name='$this->keyUsername' value='$name' />
-					</div>
-					<div>
-						<label for='$this->keyPassword'>Lösenord</label>
-						<input type='password' name='$this->keyPassword' />
-					</div>
-					<div>
-						Håll mig inloggad: <input type='checkbox' name='$this->keyRemeberMe' />
-					</div>
-					<div>
-						<input type='submit' name='submit' value='Logga in'>
-					</div>
+			  		<fieldset>
+						<legend>Login - Skriv in användarnamn och lösenord</legend>
+						" . $this->getMessage() . "
+						<div>
+							<label for='$this->keyUsername'>Användarnamn</label>
+							<input type='text' name='$this->keyUsername' value='$name' />
+						</div>
+						<div>
+							<label for='$this->keyPassword'>Lösenord</label>
+							<input type='password' name='$this->keyPassword' />
+						</div>
+						<div>
+							Håll mig inloggad: <input type='checkbox' name='$this->keyRemeberMe' />
+						</div>
+						<div>
+							<input type='submit' name='submit' value='Logga in'>
+						</div>
+					</fieldset>
 				</form>
 			</div>
 		";
@@ -172,7 +152,7 @@ class LoginView extends View{
 	}
 	
 	public function getViewHtml(){
-		return $this->getStatusHtml() . $this->getMessage() . $this->body . $this->showDate();
+		return $this->getStatusHtml() . $this->body . $this->showDate();
 	}
 	
 	public function getStatusHtml(){
@@ -180,9 +160,5 @@ class LoginView extends View{
 			return '<h2>' . $this->loggedInUser . ' är inloggad</h2>';
 		}
 		return '<h2>Ej inloggad</h2>';
-	}
-	
-	public function getUsernameFromCookie(){
-		return isset($_COOKIE[$this->strUsernameCookie]) ? $_COOKIE[$this->strUsernameCookie] : '';
 	}
 }

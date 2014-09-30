@@ -19,6 +19,7 @@ abstract class View{
 			unset($_SESSION[$this->messageKey]);
 			return '<p>' . $message . '</p>';
 		}
+		return '';
 	}
 
 	abstract public function getViewHtml();
