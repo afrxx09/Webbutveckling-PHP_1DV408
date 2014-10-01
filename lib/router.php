@@ -12,7 +12,7 @@ class Router{
 	*	Takes the $_GET from request to figure out what controller and method in that controller to run.
 	*/
 	public function __construct(){
-		$this->controller = isset($_GET['c']) ? $_GET['c'] : 'login';
+		$this->controller = isset($_GET['c']) ? $_GET['c'] : Config::$DEFAULT_CONTROLLER;
 		$this->action = isset($_GET['a']) ? $_GET['a'] : '';
 	}
 	
@@ -22,7 +22,7 @@ class Router{
 	*/
 	public function runApp(){
 		$controller = $this->loadController();
-		$action = (method_exists($controller, $this->action)) ? $this->action : 'index';
+		$action = (method_exists($controller, $this->action)) ? $this->action : Config::$DEFAULT_ACTION;
 		return call_user_func(array($controller, $action));
 	}
 	

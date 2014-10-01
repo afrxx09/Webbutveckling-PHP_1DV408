@@ -58,4 +58,15 @@ class LoginModel extends Model{
 		return ($user->getIp() === $_SERVER['REMOTE_ADDR']) ? true : false;
 	}
 	
+	/**
+	*	Uses Session-token to find the user and match the user agent and IP address to make try and prevent session hijacking
+	*	@return bool
+	*/
+	public function authSession($user){
+		if($this->checkAgent($user) && $this->checkIp($user)){
+			return true;
+		}
+		return false;
+	}
+	
 }

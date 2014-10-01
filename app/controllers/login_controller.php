@@ -13,7 +13,7 @@ class LoginController extends Controller{
 	public function __construct() {
 		$this->model = new LoginModel();
 		$this->usermodel = new UserModel();
-		$this->view = new LoginView($this->model);
+		$this->view = new LoginView($this->model, $this->usermodel);
 	}
 	
 	/**
@@ -24,6 +24,9 @@ class LoginController extends Controller{
 		return $this->login();
 	}
 	
+	/**
+	*	Destroys sessions and cookie in order to signout
+	*/
 	public function logout(){
 		$this->view->destroyAuthCookie();
 		$this->model->destroyLoginSession();
@@ -31,6 +34,10 @@ class LoginController extends Controller{
 		$this->redirectTo('login');
 	}
 	
+	/**
+	*	Tries to sign in the user if the loginform was posted.
+	*	Also creates a cookie for persistent login if that option was chosen by the user
+	*/
 	public function login() {		
 		if($this->view->userPressedLogin() === true){
 			if ($this->view->getUsername() === '') {
@@ -83,8 +90,8 @@ class LoginController extends Controller{
 		
 	}
 	
-	/*
-	**	@return string HTML for authenticated users page
+	/**
+	*	@return string HTML for authenticated users page
 	*/
 	public function successPage(){
 		if(!$this->checkSignIn()){
@@ -103,52 +110,18 @@ class LoginController extends Controller{
 	*	@return bool
 	*/
 	public function checkSignIn(){
-		$boolSuccess = false;
 		if($this->model->loginSessionExists()){
 			$user = $this->usermodel->findBy('token', $this->model->getLoginSession());
-			if($user !== null){
-				if(!$this->model->checkAgent($user)){
-					$this->view->setMessage(LoginView::ERROR_AGENT);
-				}
-				else if(!$this->model->checkIp($user)){
-					$this->view->setMessage(LoginView::ERROR_IP);
-				}
-				else{
-					$boolSuccess = true;
-				}
+			if($user !== null && $this->model->authSession($user)){
+				return true;
+			}
+			else{
+				$this->view->setMessage(LoginView::ERROR_AGENT_IP);
+				return false;
 			}
 		}
-		else{
-			if($this->view->authCookieExists()){
-				if(!$this->signInWithCookie()){
-					$this->view->setMessage(LoginView::ERROR_COOKIE_LOGIN);
-				}
-				else{
-					$this->view->setMessage(LoginView::SUCCESS_COOKIE_LOGIN);
-					$boolSuccess = true;
-				}
-			}
-		}
-		return $boolSuccess;
-	}
-	
-	/**
-	*	Method for signing in a user with an auth cookie
-	*	@return bool
-	*/
-	public function signInWithCookie(){
-		$arrCookie = explode(':', $this->view->getAuthCookie());
-		$strCookieToken = $arrCookie[0];
-		$strCookieIdentifier = $arrCookie[1];
-		$user = $this->usermodel->findBy('token', $strCookieToken);
-		if($user !== null){
-			$strCurrentVisitorIdentifier = $this->model->generateIdentifier();
-			if($strCurrentVisitorIdentifier === $strCookieIdentifier){
-				if(($user->getCookieTime() + $this->view->getAuthCookieTime()) > time()){
-					$this->model->createLoginSession($user);
-					return true;
-				}
-			}
+		if($this->view->authCookieExists() && $this->view->signInWithCookie()){
+			return true;
 		}
 		return false;
 	}

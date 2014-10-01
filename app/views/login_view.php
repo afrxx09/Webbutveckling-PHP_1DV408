@@ -13,8 +13,7 @@ class LoginView extends View{
 	const SUCCESS_LOGIN = 'Inloggning lyckades.';
 	const SUCCESS_LOGIN_REMEBER = 'Inloggning lyckades och vi kommer ihåg dig nästa gång.';
 	const SUCCESS_LOGOUT = 'Du har nu loggat ut.';
-	const ERROR_AGENT = 'Okänd useragent, misstänkt hijacking.';
-	const ERROR_IP = 'Okänt IP-nummer, misstänkt hijacking. ';
+	const ERROR_AGENT_IP = 'Okänd useragent / IP, misstänkt hijacking.';
 	
 	private $cookieName = 'auth';
 	private $cookieTime = 2592000; //60*60*24*30 = 30 days
@@ -24,9 +23,11 @@ class LoginView extends View{
 	private $keyRemeberMe = 'remeberme';
 	
 	private $model;
+	private $usermodel;
 
-	public function __construct(LoginModel $model) {
+	public function __construct(LoginModel $model, UserModel $usermodel) {
 		$this->model = $model;
+		$this->usermodel = $usermodel;
 	}
 	// Kontrollerar om användaren tryckt på logga in-knappen
 	public function userPressedLogin(){
@@ -90,6 +91,31 @@ class LoginView extends View{
 	public function getAuthCookieTime(){
 		return $this->cookieTime;
 	}
+	
+	/*
+	*	Method for signing in a user with an auth cookie
+	*	@return bool
+	*/
+	public function signInWithCookie(){
+		$arrCookie = explode(':', $this->getAuthCookie());
+		$strCookieToken = $arrCookie[0];
+		$strCookieIdentifier = $arrCookie[1];
+		$user = $this->usermodel->findBy('token', $strCookieToken);
+		if($user !== null){
+			$strCurrentVisitorIdentifier = $this->model->generateIdentifier();
+			if($strCurrentVisitorIdentifier === $strCookieIdentifier){
+				if(($user->getCookieTime() + $this->cookieTime) > time()){
+					$this->model->createLoginSession($user);
+					$this->setMessage(LoginView::SUCCESS_COOKIE_LOGIN);
+					return true;
+				}
+			}
+		}
+		$this->setMessage(LoginView::ERROR_COOKIE_LOGIN);
+		return false;
+	}
+	
+	
 	
 	// Sätter aktuell tid och datum
 	public function showDate() {
