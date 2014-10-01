@@ -22,4 +22,3 @@ class View{
 		return '';
 	}
 }
-?>

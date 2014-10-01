@@ -43,4 +43,3 @@ class Router{
 		throw new Exception('Could not find controller class file.' . $this->controller);
 	}
 }
-?>

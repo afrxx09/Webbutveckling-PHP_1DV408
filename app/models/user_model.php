@@ -39,6 +39,7 @@ class UserModel extends Model{
 	public function create($username, $password, $password_confirm){
 		$username = $this->checkUsername($username);
 		$password = $this->checkPassword($password, $password_confirm);
+		$password = $this->getScrambledPassword($password);
 		try{
 			$con = $this->connection();
 			$sql = "
@@ -87,7 +88,12 @@ class UserModel extends Model{
 	}
 	
 	public function auth($user, $password){
-		return ($user->getPassword() === $password) ? true : false;
+		return ($user->getPassword() === $this->getScrambledPassword($password)) ? true : false;
+	}
+	
+	private function getScrambledPassword($password){
+		//Will make more complex if there is time.
+		$salt = 'asd123';
+		return sha1($salt . $password);
 	}
 }
-?> 

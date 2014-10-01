@@ -18,4 +18,3 @@ class Config{
 	public static $DEFAULT_CONTROLLER = 'login';
 	public static $DEFAULT_ACTION = 'index';
 }
-?>

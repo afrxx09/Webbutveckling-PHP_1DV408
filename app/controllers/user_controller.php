@@ -42,4 +42,3 @@ class UserController extends Controller{
 		$this->redirectTo('user');
 	}
 }
-?>
