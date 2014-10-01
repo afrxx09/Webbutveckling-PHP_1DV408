@@ -2,22 +2,28 @@
 
 class LoginModel extends Model{
 	
-	private $sessionKey = 'login';
+	private $sessionToken = 'login';
+	private $sessionUsername = 'username';
 	
-	public function createLoginSession($token){
-		$_SESSION[$this->sessionKey] = $token;
+	public function createLoginSession($user){
+		$_SESSION[$this->sessionToken] = $user->getToken();
+		$_SESSION[$this->sessionUsername] = $user->getUsername();
 	}
 	
-	public function getSessionToken(){
-		return $_SESSION[$this->sessionKey];
+	public function getSessionUsername(){
+		return isset($_SESSION[$this->sessionUsername]) ? $_SESSION[$this->sessionUsername] : '';
+	}
+	
+	public function getLoginSession(){
+		return $_SESSION[$this->sessionToken];
 	}
 	
 	public function destroyLoginSession(){
-		unset($_SESSION[$this->sessionKey]);
+		unset($_SESSION[$this->sessionToken]);
 	}
 
 	public function loginSessionExists(){
-		return (isset($_SESSION[$this->sessionKey]) && $_SESSION[$this->sessionKey] !== '') ? true : false;
+		return (isset($_SESSION[$this->sessionToken]) && $_SESSION[$this->sessionToken] !== '') ? true : false;
 	}
 	
 	public function generateToken(){

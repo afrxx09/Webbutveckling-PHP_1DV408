@@ -1,6 +1,6 @@
 <?php
 
-abstract class Model{
+class Model{
 	protected $connection;
 	protected $tabelName;
 	protected $columns;
@@ -17,6 +17,9 @@ abstract class Model{
 		return $this->findBy('id', $id);
 	}
 	
+	/**
+	*	@return DBO-object|null
+	*/
 	public function findBy($column, $value){
 		try{
 			$con = $this->connection();
@@ -39,8 +42,8 @@ abstract class Model{
 			}
 			return new $this->tabelName($res);
 		}
-		catch(PDOException $e){
-			throw new Exception($e->getMessage());
+		catch(Exception $e){
+			return null;
 		}	
 	}
 }

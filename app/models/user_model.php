@@ -90,4 +90,4 @@ class UserModel extends Model{
 		return ($user->getPassword() === $password) ? true : false;
 	}
 }
-?>
+?> 

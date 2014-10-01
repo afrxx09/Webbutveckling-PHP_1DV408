@@ -1,6 +1,6 @@
 <?php
 
-abstract class View{
+class View{
 	
 	protected $messageKey = 'message';
 	protected $body;
@@ -21,7 +21,5 @@ abstract class View{
 		}
 		return '';
 	}
-
-	abstract public function getViewHtml();
 }
 ?>
